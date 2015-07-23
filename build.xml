@@ -45,7 +45,7 @@
      set to the current working directory.
 -->
 
-<project name="My Project" default="compile" basedir=".">
+<project name="Core Servlet and JSP Samples" default="compile" basedir=".">
 
 
 
@@ -124,16 +124,22 @@
 
 -->
 
-  <property name="app.name"      value="myapp"/>
+  <!-- hegb: I should move the followings to build.properties as they all are local to my env -->
+
+  <!-- define below class to retrieve system environment, e.g. ${env.CATALINA_HOME}  -->
+  <property environment="env"/>
+
+  <property name="app.name"      value="coresj"/>
   <property name="app.path"      value="/${app.name}"/>
-  <property name="app.version"   value="0.1-dev"/>
+  <property name="app.version"   value="0.1"/>
   <property name="build.home"    value="${basedir}/build"/>
-  <property name="catalina.home" value="../../../.."/> <!-- UPDATE THIS! -->
+<!--  <property name="catalina.home" value="../../../bin/apache-tomcat-8.0.23/"/> --> <!-- UPDATE THIS! -->
+  <property name="catalina.home" value="${env.CATALINA_HOME}"/>
   <property name="dist.home"     value="${basedir}/dist"/>
   <property name="docs.home"     value="${basedir}/docs"/>
   <property name="manager.url"   value="http://localhost:8080/manager/text"/>
   <property name="src.home"      value="${basedir}/src"/>
-  <property name="web.home"      value="${basedir}/web"/>
+  <property name="web.home"      value="${basedir}/WebRoot"/>
 
 
 <!-- ==================== External Dependencies =========================== -->
@@ -329,7 +335,11 @@
     </copy>
 
     <!-- Create application JAR file -->
-    <jar jarfile="${dist.home}/${app.name}-${app.version}.war"
+<!-- App name suffixed with version and "stage" is recommended, for example: "coresj-0.1-dev.war".
+     However, I feel it is a bit bothersome. So I only use app name.
+    <jar jarfile="${dist.home}/${app.name}-${app.version}.war" -->
+
+    <jar jarfile="${dist.home}/${app.name}.war"
          basedir="${build.home}"/>
 
     <!-- Copy additional files to ${dist.home} as necessary -->
@@ -359,14 +369,14 @@
 
 -->
 
-  <target name="install" depends="compile"
-   description="Install application to servlet container">
+  <target name="install" depends="dist,remove"
+          description="Install application to servlet container">
 
     <deploy url="${manager.url}"
        username="${manager.username}"
        password="${manager.password}"
            path="${app.path}"
-       localWar="file://${build.home}"/>
+       localWar="file://${dist.home}/${app.name}.war"/>
 
   </target>
 
@@ -500,7 +510,8 @@
     <undeploy url="${manager.url}"
          username="${manager.username}"
          password="${manager.password}"
-             path="${app.path}"/>
+             path="${app.path}"
+      failonerror="false" />
 
   </target>
 
